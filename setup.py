@@ -34,10 +34,12 @@ setup(
     include_package_data=True,
     entry_points={'console_scripts': [
         'loloadx = loloadx.command_line:execute',
+        'web_loloadx = loloadx.web:run_web',
     ]},
     zip_safe=True,
-#    requires=('pyinotify',),
-#    install_requires=['pyinotify',],
+    requires=('flask',),
+    install_requires=['flask', 'gunicorn'],
+    data_files=[('/etc/init/', ['init/web_loloadx.conf'])],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: edX Platform',

@@ -5,6 +5,7 @@ fullstack instance.
 """
 
 from loloadx.util import CourseImporter
+from loloadx.config import conf
 
 def execute():
     """
@@ -13,3 +14,5 @@ def execute():
 
     importer = CourseImporter()
     importer.load_course_dir()
+    if conf['debug']:
+        print('\n'.join(importer.messages))

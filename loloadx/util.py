@@ -7,12 +7,6 @@ import subprocess
 
 from loloadx.config import conf
 
-def vprint(*args):
-    """Print stuff if debug is turned on."""
-    if conf['debug']:
-        for arg in args:
-            print(arg)
-
 
 class CourseImporter(object):
     """
@@ -25,7 +19,19 @@ class CourseImporter(object):
         self.edx_venv = edx_venv
         self.edx_root = edx_root
         self.course_dir = course_dir
+        self.messages = []
 
+
+    def course_list(self):
+        courses = []
+        if not os.path.isdir(self.course_dir):
+            return courses
+        for dirname in os.listdir(self.course_dir):
+            fullpath = os.path.join(self.course_dir, dirname)
+            if os.path.isdir(fullpath):
+                courses.append(dirname)
+        return courses
+        
     def import_course(self, course, static=True):
         """
         Load the specified course into edx using the management command.
@@ -35,20 +41,29 @@ class CourseImporter(object):
                       'import', self.course_dir, course, ]
         if not static:
             import_cmd.append('--nostatic')
-        vprint(import_cmd)
+        full_course_dir = '{0}/{1}'.format(self.course_dir, course)
+
+        if not os.path.isdir(full_course_dir):
+            self.messages.append('Course does not '
+                                 'exist at {0}'.format(full_course_dir))
+            return False
+        self.messages.append(' '.join(import_cmd))
         wd = '{0}/{1}'.format(self.edx_root, 'edx-platform')
-        vprint(wd)
-        course_import = subprocess.check_output(import_cmd, cwd=wd)
-        return course_import
+        self.messages.append(wd)
+        course_import = subprocess.check_output(import_cmd, cwd=wd,
+                                                stderr=subprocess.STDOUT)
+        self.messages.append(course_import)
+        return True
 
     def load_course_dir(self):
         """
         Loop through all courses in the directory and
         load them up.
         """
-        for dirname in os.listdir(self.course_dir):
-            fullpath = os.path.join(self.course_dir, dirname)
-            if os.path.isdir(fullpath):
-                vprint('Importing course {0} from {1}'.format(
-                    dirname, self.course_dir))
-                vprint(self.import_course(dirname))
+        courses = self.course_list()
+        
+        for course in courses:
+            fullpath = os.path.join(self.course_dir, course)
+            self.messages.append('Importing course {0} from {1}'.format(
+                course, self.course_dir))
+            self.import_course(course)
