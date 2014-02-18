@@ -38,6 +38,7 @@ def load_all():
         importer.load_course_dir()
         return '\n'.join(importer.messages)
 
+
 @app.route('/load_course', methods=['POST', 'OPTIONS'])
 @crossdomain(origin='*')
 def load_course():
@@ -46,20 +47,34 @@ def load_course():
     the course is in.
     """
     if request.method == 'POST':
+        use_dir = True
         course_dir = request.form.get('course_dir', None)
-        if not course_dir:
-            return 'No course directory specified.'
+        course_id = request.form.get('course_id', None)
+        if not (course_dir or course_id):
+            return ('No course identified specified. '
+                    'Either directory or course id expected.')
 
+        if course_id:
+            use_dir = False
         importer = CourseImporter()
+
+        if course_id:
+            course_dir = importer.course_by_id(course_id)
+            if not course_dir:
+                return 'No course found by ID {0}'.format(course_id)
+
         if not course_dir in importer.course_list():
             return 'No course found in {0} directory'.format(course_path)
 
         importer.import_course(course_dir)
+            
         return '\n'.join(importer.messages)
+
 
 def run_web():
     app.debug = False
     app.run(host='0.0.0.0')
+
 
 if __name__ == '__main__':
     run_web()

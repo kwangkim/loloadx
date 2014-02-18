@@ -3,6 +3,7 @@ Utility functions for actually loading courses
 """
 
 import os
+import re
 import subprocess
 
 from loloadx.config import conf
@@ -31,6 +32,34 @@ class CourseImporter(object):
             if os.path.isdir(fullpath):
                 courses.append(dirname)
         return courses
+
+    def course_by_id(self, course_id):
+        """
+        Trounce through course xml and try to find the id given.
+        Return the course directory found.
+        """
+        course_m = re.search('(?P<org>[\w_\.\-]+)/(?P<name>[\w_\.\-]+)', course_id)
+        if not course_m:
+            self.messages.append('Invalid course_id passed in')
+            return None
+        course_dict = course_m.groupdict()
+        org = course_dict['org']
+        name = course_dict['name']
+
+        for course in self.course_list():
+            course_xml = '{0}/{1}/course.xml'.format(self.course_dir, course)
+            if os.path.exists(course_xml):
+                with open(course_xml, 'r') as fp:
+                    courseml = fp.read()
+                m = re.search('org="(?P<org>\w+)"', courseml)
+                if m:
+                    if org == m.groupdict()['org']:
+                        m = re.search('course="(?P<course>\w+)"', courseml)
+                        if m:
+                            if name == m.groupdict()['course']:
+                                return course
+        return None
+            
         
     def import_course(self, course, static=True):
         """
