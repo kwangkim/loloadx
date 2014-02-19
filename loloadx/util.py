@@ -14,20 +14,22 @@ class CourseImporter(object):
     Handles importing courses based on settings, into directory
     """
     def __init__(self, edx_venv=conf['edx_venv'],
-                 edx_root=conf['edx_root'], course_dir=conf['course_dir']):
+                 edx_root=conf['edx_root'], course_dir=conf['course_dir'],
+                 import_static=conf['import_static']):
         """Setup all the internals for running methods"""
 
         self.edx_venv = edx_venv
         self.edx_root = edx_root
         self.course_dir = course_dir
+        self.import_static = import_static
         self.messages = []
 
 
     def course_list(self):
         courses = []
         if not os.path.isdir(self.course_dir):
-            self.messages.append('No courses found, does {0} exist and have '
-                                 'a course in it?'.format(self.course_dir))
+            self.messages.append('Course directory {0} doesn\'t exist, '
+                                 'please create it.'.format(self.course_dir))
             return courses
         for dirname in os.listdir(self.course_dir):
             fullpath = os.path.join(self.course_dir, dirname)
@@ -63,14 +65,14 @@ class CourseImporter(object):
         return None
             
         
-    def import_course(self, course, static=True):
+    def import_course(self, course):
         """
         Load the specified course into edx using the management command.
         """
         import_cmd = ['{0}/bin/python'.format(self.edx_venv),
                       'manage.py', 'lms', '--settings=aws',
                       'import', self.course_dir, course, ]
-        if not static:
+        if not self.import_static:
             import_cmd.append('--nostatic')
         full_course_dir = '{0}/{1}'.format(self.course_dir, course)
 
@@ -92,7 +94,9 @@ class CourseImporter(object):
         load them up.
         """
         courses = self.course_list()
-        
+        if len(courses) == 0:
+            self.messages.append('No courses found, does {0} have '
+                                 'a course in it?'.format(self.course_dir))
         for course in courses:
             fullpath = os.path.join(self.course_dir, course)
             self.messages.append('Importing course {0} from {1}'.format(

@@ -13,6 +13,7 @@ def get_settings():
         'edx_venv': '/edx/app/edxapp/venvs/edxapp',
         'course_dir': '/vagrant/courses',
         'debug': True,
+        'import_static': True,
     }
 
     config_parser = ConfigParser.SafeConfigParser()
