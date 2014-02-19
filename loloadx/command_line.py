@@ -7,6 +7,7 @@ fullstack instance.
 from loloadx.util import CourseImporter
 from loloadx.config import conf
 
+
 def execute():
     """
     Import the courses in the directory

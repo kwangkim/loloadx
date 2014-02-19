@@ -1,6 +1,7 @@
 """
 Utility functions for actually loading courses
 """
+# pylint: disable=c0103
 
 import os
 import re
@@ -24,8 +25,10 @@ class CourseImporter(object):
         self.import_static = import_static
         self.messages = []
 
-
     def course_list(self):
+        """
+        Use directory listing to get a list of courses.
+        """
         courses = []
         if not os.path.isdir(self.course_dir):
             self.messages.append('Course directory {0} doesn\'t exist, '
@@ -42,7 +45,8 @@ class CourseImporter(object):
         Trounce through course xml and try to find the id given.
         Return the course directory found.
         """
-        course_m = re.search('(?P<org>[\w_\.\-]+)/(?P<name>[\w_\.\-]+)', course_id)
+        course_m = re.search(r'(?P<org>[\w_\.\-]+)/(?P<name>[\w_\.\-]+)',
+                             course_id)
         if not course_m:
             self.messages.append('Invalid course_id passed in')
             return None
@@ -55,16 +59,16 @@ class CourseImporter(object):
             if os.path.exists(course_xml):
                 with open(course_xml, 'r') as fp:
                     courseml = fp.read()
-                m = re.search('org="(?P<org>\w+)"', courseml)
+                m = re.search(r'org="(?P<org>[\w_\.\-]+)"', courseml)
                 if m:
                     if org == m.groupdict()['org']:
-                        m = re.search('course="(?P<course>\w+)"', courseml)
+                        m = re.search(r'course="(?P<course>[\w_\.\-]+)"',
+                                      courseml)
                         if m:
                             if name == m.groupdict()['course']:
                                 return course
         return None
-            
-        
+
     def import_course(self, course):
         """
         Load the specified course into edx using the management command.
@@ -98,7 +102,6 @@ class CourseImporter(object):
             self.messages.append('No courses found, does {0} have '
                                  'a course in it?'.format(self.course_dir))
         for course in courses:
-            fullpath = os.path.join(self.course_dir, course)
             self.messages.append('Importing course {0} from {1}'.format(
                 course, self.course_dir))
             self.import_course(course)

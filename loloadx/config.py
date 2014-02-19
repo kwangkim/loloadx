@@ -1,6 +1,8 @@
 """
 Handle setting up the configuration for the app
 """
+# pylint: disable=c0103
+
 import ConfigParser
 import os
 
@@ -29,5 +31,5 @@ def get_settings():
         except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
             pass
     return settings
-    
+
 conf = get_settings()
