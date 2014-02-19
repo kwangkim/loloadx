@@ -26,6 +26,8 @@ class CourseImporter(object):
     def course_list(self):
         courses = []
         if not os.path.isdir(self.course_dir):
+            self.messages.append('No courses found, does {0} exist and have '
+                                 'a course in it?'.format(self.course_dir))
             return courses
         for dirname in os.listdir(self.course_dir):
             fullpath = os.path.join(self.course_dir, dirname)
