@@ -87,8 +87,12 @@ class CourseImporter(object):
         self.messages.append(' '.join(import_cmd))
         wd = '{0}/{1}'.format(self.edx_root, 'edx-platform')
         self.messages.append(wd)
-        course_import = subprocess.check_output(import_cmd, cwd=wd,
-                                                stderr=subprocess.STDOUT)
+        try:
+            course_import = subprocess.check_output(import_cmd, cwd=wd,
+                                                    stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as ex:
+            self.messages.append("Unable to import course: {0!r}".format(ex.output))
+            return False
         self.messages.append(course_import)
         return True
 
