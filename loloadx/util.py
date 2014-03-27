@@ -91,7 +91,8 @@ class CourseImporter(object):
             course_import = subprocess.check_output(import_cmd, cwd=wd,
                                                     stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as ex:
-            self.messages.append("Unable to import course: {0!r}".format(ex.output))
+            self.messages.append("Unable to import course: {0!r}".format(
+                ex.output))
             return False
         self.messages.append(course_import)
         return True

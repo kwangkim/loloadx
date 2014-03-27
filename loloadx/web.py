@@ -10,7 +10,7 @@ from loloadx.util import CourseImporter
 from loloadx.config import conf
 from loloadx.webutil import crossdomain
 
-app = Flask(__name__)
+app = Flask(__name__) # pylint: disable-msg=C0103
 app.debug = True
 
 
